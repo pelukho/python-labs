@@ -15,13 +15,9 @@ def get_alphabet():
     }
 
 
-def task1():
-    new_table = {}
-    result = ''
-    name = 'KOZHUKHOVSKY'
+def decode_alphabet():
+    decoded_alphabet = {}
     alphabet = get_alphabet()
-    key_list = list(alphabet.keys())
-    val_list = list(alphabet.values())
     decode = {
         '00': '10', '01': '22', '02': '17', '03': '07', '04': '15',
         '05': '19', '06': '01', '07': '13', '08': '20', '09': '26',
@@ -31,14 +27,51 @@ def task1():
         '25': '11', '26': '18'
 
     }
-
     for key in decode:
-        new_table[key] = alphabet[decode[key]]
+        decoded_alphabet[key] = alphabet[decode[key]]
+
+    return decoded_alphabet
+
+
+def pretty_print(array):
+    print('-' * (len(array) + 7))
+
+    for i in array:
+        print('|', end=' ')
+
+        for j in i:
+            print(j, end=' ')
+
+        print('|')
+
+    print('-' * (len(array) + 7), end="\n\n")
+
+
+def find_index(array, needle):
+    row = -1
+    col = -1
+    for i in range(len(array)):
+        for j in range(len(array[i])):
+            if needle == array[i][j]:
+                row = i
+                col = j
+
+    return [row, col]
+
+
+def task1():
+    result = ''
+    name = 'KOZHUKHOVSKY'
+    new_table = decode_alphabet()
+    alphabet = get_alphabet()
+    key_list = list(alphabet.keys())
+    val_list = list(alphabet.values())
 
     for letter in name:
         result += new_table[key_list[val_list.index(letter)]]
 
-    print(result)
+    print('Input: {}'.format(name))
+    print('Result: {}'.format(result))
 
 
 def task2():
@@ -73,7 +106,8 @@ def task2():
     for letter in name:
         result += new_table[letter]
 
-    print(result)
+    print('Input: {}'.format(name))
+    print('Result: {}'.format(name))
 
 
 def task3():
@@ -85,9 +119,96 @@ def task3():
     list_keys = list(alphabet.keys())
     list_values = list(alphabet.values())
 
+    if int(len(name) / len(public_key)) <= 2:
+        public_key = public_key * 2
+    else:
+        public_key = public_key * int(len(name) / len(public_key))
+
+    for i in range(len(name)):
+        num1 = list_keys[list_values.index(name[i])]
+        num2 = list_keys[list_values.index(public_key[i])]
+
+        new_key = int(num1) + int(num2)
+
+        if new_key > power:
+            new_key = new_key - power
+            new_key = new_key if new_key > 9 else '0{}'.format(new_key)
+        elif new_key < power:
+            new_key = new_key if new_key > 9 else '0{}'.format(new_key)
+
+        result += list_values[list_keys.index(str(new_key))]
+
+    print('Input: {}'.format(name))
+    print('Result: {}'.format(result))
+
 
 def task4():
-    print('task4')
+    result = ''
+    matrix = []
+    tmp = []
+    index = 0
+    name = 'KOZHUKHOVSKY' if len('KOZHUKHOVSKY') % 2 == 0 else 'KOZHUKHOVSKY' + '.'
+    decoded_alphabet = decode_alphabet()
+    values = list(decoded_alphabet.values())
+    values = values[:4] + ['.'] + values[4:14] + [','] + values[14:19] + ['-'] + values[19:]
+
+    # заполняем матрицу
+    for i in range(len(values)):
+        if i + 1 == len(values):
+            tmp.append(values[i])
+            matrix.append(tmp)
+            tmp = []
+            break
+        if i != 0 and i % 5 == 0:
+            matrix.append(tmp)
+            tmp = []
+        tmp.append(values[i])
+
+    print('Shifr:')
+    pretty_print(matrix)
+
+    while index < len(name):
+        a = find_index(matrix, name[index])
+        b = find_index(matrix, name[index + 1])
+
+        # если вдруго задали символ, которого нет в матрице
+        if a[0] == -1 or b[0] == -1 or a[1] == -1 or b[1] == -1:
+            result = 'Symbol do not exist in the search alphabet'
+            break
+
+        # если в одной колонке
+        if a[0] == b[0]:
+            if a[0] == len(matrix[0]):
+                result += matrix[a[0]][0]
+            else:
+                result += matrix[a[0]][a[1] + 1]
+
+            if b[0] == len(matrix[0]):
+                result += matrix[b[0]][0]
+            else:
+                result += matrix[b[0]][b[1] + 1]
+
+        # если в одном ряду
+        elif a[1] == b[1]:
+            if a[0] == len(matrix):
+                result += matrix[0][a[1]]
+            else:
+                result += matrix[a[0] + 1][a[1]]
+
+            if b[0] == len(matrix):
+                result += matrix[0][b[1]]
+            else:
+                result += matrix[b[0] + 1][b[1]]
+
+        # если в разных рядах и колонках
+        else:
+            result += matrix[a[0]][b[1]]
+            result += matrix[b[0]][a[1]]
+
+        index += 2
+
+    print('Input: {}'.format(name))
+    print('Result: {}'.format(result))
 
 
 def task5():
@@ -117,16 +238,16 @@ def get_command():
 
 if __name__ == '__main__':
     while command != 'q':
-        if command == 'info':
+        if command == 'i':
             info()
-        elif command == 'task1':
+        elif command == '1':
             task1()
-        elif command == 'task2':
+        elif command == '2':
             task2()
-        elif command == 'task3':
+        elif command == '3':
             task3()
-        elif command == 'task4':
+        elif command == '4':
             task4()
-        elif command == 'task5':
+        elif command == '5':
             task5()
         get_command()
