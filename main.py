@@ -1,3 +1,5 @@
+import random
+
 command = ''
 
 
@@ -34,17 +36,17 @@ def decode_alphabet():
 
 
 def pretty_print(array):
-    print('-' * (len(array) + 7))
+    print('#' * (len(array[0])+4))
 
     for i in array:
-        print('|', end=' ')
+        print('#', end=' ')
 
         for j in i:
-            print(j, end=' ')
+            print(j, end='')
 
-        print('|')
+        print(' #', end=' \n')
 
-    print('-' * (len(array) + 7), end="\n\n")
+    print('#' * (len(array[0])+4), end="\n\n")
 
 
 def find_index(array, needle):
@@ -57,6 +59,25 @@ def find_index(array, needle):
                 col = j
 
     return [row, col]
+
+
+def add_diff_to_list(list1, list2):
+    diff = len(list1) - len(list2)
+    elements = ['-', '.', '~']
+
+    for i in range(diff):
+        list2.append(random.choice(elements))
+
+
+def get_element_by_index(column, array_list):
+    res = ''
+    for i in array_list:
+        if i == array_list[0] or i == array_list[1]:
+            continue
+        res += i[column]
+    res += ' '
+
+    return res
 
 
 def task1():
@@ -107,7 +128,7 @@ def task2():
         result += new_table[letter]
 
     print('Input: {}'.format(name))
-    print('Result: {}'.format(name))
+    print('Result: {}'.format(result))
 
 
 def task3():
@@ -164,9 +185,6 @@ def task4():
             tmp = []
         tmp.append(values[i])
 
-    print('Shifr:')
-    pretty_print(matrix)
-
     while index < len(name):
         a = find_index(matrix, name[index])
         b = find_index(matrix, name[index + 1])
@@ -207,25 +225,75 @@ def task4():
 
         index += 2
 
+    pretty_print(matrix)
     print('Input: {}'.format(name))
     print('Result: {}'.format(result))
 
 
 def task5():
-    print('task5')
+    public_key = 'FOREVER'
+    clone_key = ''.join(sorted(public_key))
+    shifr = 'KOZHUKHOVSKY YAROSLAV АLEKSANDROVICH'
+    number_shifr = ''
+    result = ''
+    key_dictionary = {}
+    matrix = []
+
+    # создаем ключь значение для публичного ключа
+    for i in range(len(clone_key)):
+        key_dictionary[i+1] = clone_key[i]
+
+    keys = list(key_dictionary.keys())
+    values = list(key_dictionary.values())
+
+    # создаем нумерованный ключь
+    for i in public_key:
+        number_shifr += str(keys[values.index(i)])
+        keys.remove(keys[values.index(i)])
+        values.remove(values[values.index(i)])
+
+    matrix.append(list(public_key))
+    matrix.append(list(number_shifr))
+
+    # создаем матрицу
+    tmp = []
+    shifr = shifr.replace(' ', '')
+
+    for i in range(len(shifr)):
+        if i + 1 == len(shifr):
+            tmp.append(shifr[i])
+
+            # если не хватает символов в последнем кортеже
+            if len(shifr) > len(tmp):
+                add_diff_to_list(public_key, tmp)
+            matrix.append(tmp)
+            tmp = []
+            break
+        if i != 0 and i % len(public_key) == 0:
+            matrix.append(tmp)
+            tmp = []
+        tmp.append(shifr[i])
+
+    for i in list(key_dictionary.keys()):
+        index = find_index(matrix, str(i))
+        result += get_element_by_index(index[1], matrix)
+
+    pretty_print(matrix)
+    print('Input: {}'.format(shifr))
+    print('Result: {}'.format(result))
 
 
 def info():
-    print('\n########################')
-    print('#     Command list       #')
-    print('#       [task1]          #')
-    print('#       [task2]          #')
-    print('#       [task3]          #')
-    print('#       [task4]          #')
-    print('#       [task5]          #')
-    print('#       [info]           #')
-    print('#      [q] - exit        #')
-    print('########################\n')
+    print('\n##########################')
+    print('#      Command list        #')
+    print('#       [task1 - 1]        #')
+    print('#       [task2 - 2]        #')
+    print('#       [task3 - 3]        #')
+    print('#       [task4 - 4]        #')
+    print('#       [task5 - 5]        #')
+    print('#       [info - i]         #')
+    print('#       [q - exit]         #')
+    print('##########################\n')
 
 
 info()
